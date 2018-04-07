@@ -3,9 +3,11 @@ import os
 import pickle
 from sys import stdin
 
+
 class Parser:
     def init(self, line):
         self.line = line
+
     def preprocess(self, lc):
         newline = ''
         for x in self.line:
@@ -13,7 +15,8 @@ class Parser:
                 if lc:
                     x = x.lower()
                 newline += x
-        self.line = newline.split() 
+        self.line = newline.split()
+
     def get_tokens(self, words):
         for i in range(1, len(self.line)):
             if not words.get(self.line[i - 1]):
@@ -22,16 +25,26 @@ class Parser:
                 words[self.line[i - 1]][self.line[i]] = 1
             else:
                 words[self.line[i - 1]][self.line[i]] += 1
-        return words    
-    
+        return words
+
+
 def dump_dictionary(model, words):
     with open(model, "wb") as fout:
         pickle.dump(words, fout)
 
-parser = argparse.ArgumentParser(description = 'A script which collects words from file')
-parser.add_argument('--input-dir', dest = 'directory', type = str, default = 'stdin', help = 'File directory' )
-parser.add_argument('--model', required = True, type = str, help = 'Save file' )
-parser.add_argument('--lc', action = 'store_true', help = 'Switch to lowercase' )
+parser = argparse.ArgumentParser(description='A script which collects words from file')
+parser.add_argument('--input-dir',
+                    dest='directory',
+                    type=str,
+                    default='stdin',
+                    help='File directory')
+parser.add_argument('--model',
+                    required=True,
+                    type=str,
+                    help='Save file')
+parser.add_argument('--lc',
+                    action='store_true',
+                    help='Switch to lowercase')
 args = parser.parse_args()
 
 if __name__ == '__main__':
@@ -51,5 +64,5 @@ if __name__ == '__main__':
                 for line in file:
                     p.init(line)
                     p.preprocess(args.lc)
-                    p.get_tokens(words)                    
+                    p.get_tokens(words)
     dump_dictionary(args.model, words)
