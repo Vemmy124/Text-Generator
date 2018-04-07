@@ -38,11 +38,13 @@ def smart_open(directory=None):
         fh = sys.stdin
         yield fh
 
+
 def all_files_generator(directory, files):
     for file in files:
         with open("{}\\{}".format(directory, file)) as fin:
             for line in fin:
                 yield line
+
 
 def dump_dictionary(model, words):
     with open(model, "wb") as fout:

@@ -30,10 +30,7 @@ class Generator:
             if not self.words.get(self.word):
                 self.word = random.choice(list(self.words.keys()))
             else:
-                for key in self.words[self.word]:
-                    for j in range(self.words[self.word][key]):
-                        nextwords.append(key)
-                self.word = random.choice(nextwords)
+                self.word = weighted_choice(self.words)
 
     def print_text(self, output):
         with smart_open(output) as fout:
@@ -52,6 +49,22 @@ def smart_open(filename=None):
     finally:
         if fh != sys.stdout:
             fh.close()
+
+
+def summary_length(lst):
+    length = 0
+    for item in lst:
+        length += len(item)
+    return length
+
+
+def weighted_choice(dictionary):
+    rnd = random.random() * summary_length(dictionary.values())
+    for key, value in dictionary.items():
+        rnd -= len(value)
+        if rnd < 0:
+            return key
+
 
 parser = argparse.ArgumentParser(description='A script which generates text from model')
 parser.add_argument('--model',
