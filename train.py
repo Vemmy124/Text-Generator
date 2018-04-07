@@ -1,7 +1,8 @@
 import argparse
 import os
 import pickle
-from sys import stdin
+import contextlib
+import sys
 
 
 class Parser:
@@ -28,6 +29,23 @@ class Parser:
         return words
 
 
+@contextlib.contextmanager
+def smart_open(directory=None):
+    if directory and directory != 'stdin':
+        files = os.listdir(directory)
+        yield all_files_generator(directory, files)
+    else:
+        fh = sys.stdin
+        yield fh
+
+
+def all_files_generator(directory, files):
+    for file in files:
+        with open("{}\\{}".format(directory, file)) as fin:
+            for line in fin:
+                yield line
+
+
 def dump_dictionary(model, words):
     with open(model, "wb") as fout:
         pickle.dump(words, fout)
@@ -50,19 +68,9 @@ args = parser.parse_args()
 if __name__ == '__main__':
     p = Parser()
     words = {}
-    if args.directory == 'stdin':
-        for line in stdin:
+    with smart_open(args.directory) as fin:
+        for line in fin:
             p.init(line)
             p.preprocess(args.lc)
             p.get_tokens(words)
-    else:
-        files = os.listdir(args.directory)
-        for file in files:
-            if len(file) < 5 or file[-4:] != '.txt':
-                raise Exception
-            with open("{}\\{}".format(args.directory, file)) as file:
-                for line in file:
-                    p.init(line)
-                    p.preprocess(args.lc)
-                    p.get_tokens(words)
     dump_dictionary(args.model, words)
