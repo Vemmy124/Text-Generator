@@ -1,7 +1,7 @@
 import argparse
 import pickle
 import random
-import contextlib
+import utils
 import sys
 
 
@@ -10,8 +10,7 @@ class Generator:
     text = []
 
     def load_words(self, file):
-        with open(args.model, "rb") as file:
-            self.words = pickle.load(file)
+        self.words = utils.load_dictionary(file)
 
     def set_seed(self, seed):
         if not seed:
@@ -30,40 +29,12 @@ class Generator:
             if not self.words.get(self.word):
                 self.word = random.choice(list(self.words.keys()))
             else:
-                self.word = weighted_choice(self.words)
+                self.word = utils.weighted_choice(self.words)
 
     def print_text(self, output):
-        with smart_open(output) as fout:
+        with utils.smart_open(output, "w") as fout:
             for word in self.text:
                 fout.write('{} '.format(word))
-
-
-@contextlib.contextmanager
-def smart_open(filename=None):
-    if filename:
-        fh = open(filename, 'w')
-    else:
-        fh = sys.stdout
-    try:
-        yield fh
-    finally:
-        if fh != sys.stdout:
-            fh.close()
-
-
-def summary_length(lst):
-    length = 0
-    for item in lst:
-        length += len(item)
-    return length
-
-
-def weighted_choice(dictionary):
-    rnd = random.random() * summary_length(dictionary.values())
-    for key, value in dictionary.items():
-        rnd -= len(value)
-        if rnd < 0:
-            return key
 
 
 parser = argparse.ArgumentParser(description='A script which generates text from model')

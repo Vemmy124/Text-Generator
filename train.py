@@ -1,12 +1,11 @@
 import argparse
 import os
-import pickle
-import contextlib
+import utils
 import sys
 
 
 class Parser:
-    def init(self, line):
+    def __init__(self, line):
         self.line = line
 
     def preprocess(self, lc):
@@ -29,27 +28,6 @@ class Parser:
         return words
 
 
-@contextlib.contextmanager
-def smart_open(directory=None):
-    if directory and directory != 'stdin':
-        files = os.listdir(directory)
-        yield all_files_generator(directory, files)
-    else:
-        fh = sys.stdin
-        yield fh
-
-
-def all_files_generator(directory, files):
-    for file in files:
-        with open("{}\\{}".format(directory, file)) as fin:
-            for line in fin:
-                yield line
-
-
-def dump_dictionary(model, words):
-    with open(model, "wb") as fout:
-        pickle.dump(words, fout)
-
 parser = argparse.ArgumentParser(description='A script which collects words from file')
 parser.add_argument('--input-dir',
                     dest='directory',
@@ -66,11 +44,10 @@ parser.add_argument('--lc',
 args = parser.parse_args()
 
 if __name__ == '__main__':
-    p = Parser()
     words = {}
-    with smart_open(args.directory) as fin:
-        for line in fin:
-            p.init(line)
+    with utils.smart_open(args.directory, "r") as fin:
+        for line in utils.all_files_generator(fin):
+            p = Parser(line)
             p.preprocess(args.lc)
             p.get_tokens(words)
-    dump_dictionary(args.model, words)
+    utils.dump_dictionary(args.model, words)
