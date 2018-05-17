@@ -51,9 +51,13 @@ def weighted_choice(dictionary):
 
 
 def all_files_generator(files):
-    for file in files:
-        for line in file:
-            yield line
+    if isinstance(files, list):
+        for file in files:
+            for line in file:
+                yield line
+    else:
+        for line in files:
+            yield line        
 
 
 def dump_dictionary(model, words):
